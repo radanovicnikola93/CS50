@@ -14,37 +14,45 @@ int main(int argc, char *argv[])
         printf("Usage: ./caesar key\n");
         return 1;
     }
+    
+    // Only integers allowed in the command line argument
+    for (int c = 0, lenght = strlen(argv[1]); c < lenght; c++)
+    {
+        if (isdigit(argv[1][c]) == false)
+        {
+            printf("Usage: ./vigenere keyword\n");
+            return 1;
+        }
+    }
 
     // We convert the second element of the array from a string to integer
     int key = atoi(argv[1]);
 
-    // If it is a negative integer or the program contains char or string the program will end immediately
-    if (key < 0 || key == isdigit(key))
+    // If it is a negative integer the program will end immediately
+    if (key < 0)
     {
         printf("Usage: ./caesar key\n");
         return 1;
     } 
-    else 
+        
+    // Prompt the user for paintext
+    string plaintext = get_string("Enter a plaintext: ");
+
+    // Iterates over every character of the plaintext
+    for (int c = 0, lenght = strlen(plaintext); c < lenght; c++)
     {
-        // Prompt the user for paintext
-        string plaintext = get_string("Enter a plaintext: ");
-
-        // Iterates over every character of the plaintext
-        for (int c = 0, lenght = strlen(plaintext); c < lenght; c++)
+        // Lowercase
+        if (islower(plaintext[c]))
         {
-            // Lowercase
-            if (islower(plaintext[c]))
-            {
-                plaintext[c] = ((((plaintext[c] + key) - 97) % 26) + 97);
-            }
-
-            // Uppercase
-            else if (isupper(plaintext[c]))
-            {
-                plaintext[c] = ((((plaintext[c] + key) - 65) % 26) + 65);
-            }
+            plaintext[c] = ((((plaintext[c] + key) - 97) % 26) + 97);
         }
-        // Prints ciphertext 
-        printf("ciphertext: %s\n", plaintext);
+
+        // Uppercase
+        else if (isupper(plaintext[c]))
+        {
+            plaintext[c] = ((((plaintext[c] + key) - 65) % 26) + 65);
+        }
     }
+    // Prints ciphertext 
+    printf("ciphertext: %s\n", plaintext);
 }

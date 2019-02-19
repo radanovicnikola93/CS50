@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
             
             
-            // It pixels are pure red or lighter red them to white
+            // If pixels are pure red or lighter red convert them to white
             if (triple.rgbtRed == 0xff && triple.rgbtGreen >= 0x00 && triple.rgbtBlue >= 0x00) 
             {
                 triple.rgbtBlue = 0xff;

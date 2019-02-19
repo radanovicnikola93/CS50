@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     {
         if (isdigit(argv[1][c]) == false)
         {
-            printf("Usage: ./caesar keyword\n");
+            printf("Usage: ./caesar key\n");
             return 1;
         }
     }

@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     {
         if (isdigit(argv[1][c]) == false)
         {
-            printf("Usage: ./vigenere keyword\n");
+            printf("Usage: ./caesar keyword\n");
             return 1;
         }
     }

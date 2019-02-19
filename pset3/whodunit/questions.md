@@ -35,7 +35,7 @@
 
 ## Why might `fopen` return `NULL` in lines 24 and 32 of `copy.c`?
 
-* If the file cannot be found.
+* If the file is empty.
 
 ## Why is the third argument to `fread` always `1` in our code? (For example, see lines 40, 44, and 75.)
 

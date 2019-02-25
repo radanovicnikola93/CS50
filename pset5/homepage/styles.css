@@ -1,0 +1,58 @@
+body {
+    background-color: black;
+    color: white;
+    margin: 0;
+}
+
+a {
+    color: white;
+    border: red solid 2px;
+}
+
+a:hover {
+    color: #1e90ff;
+    font-size: 150%;
+}
+
+.container-fluid {
+    margin: auto;
+ }
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  opacity: 0.5;
+}
+
+.content {
+    padding-top: 100px;
+}
+
+p, h5 {
+    text-align: center;
+}
+
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#inputMessage {
+    height: 400px;
+}
+
+#contact {
+    text-align: center;
+}
+
+form {
+    width: 80%;
+    margin: 0 auto;
+}

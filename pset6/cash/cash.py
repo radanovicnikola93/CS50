@@ -1,4 +1,4 @@
-from cs50 import cs50   # needed for get_float
+from cs50 import get_float   # needed for get_float
 
 # initializing coins to count from 0
 coins = 0

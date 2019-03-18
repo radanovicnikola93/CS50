@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <h3>Registered users</h3>
+
+            <table class="table table-hover table-light">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Surname</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">City</th>
+                        <th scope="col">Zip Code</th>
+                        <th scope="col">Country</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <!--Adding numbers of registered users-->
+                        <th scope="row">{{ loop.index }}</th>
+                        <!--Name-->
+                        <td>{{ user[0] }}</td>
+                        <!--Surname-->
+                        <td>{{ user[1] }}</td>
+                        <!--Title-->
+                        <td>{{ user[5] }}</td>
+                        <!--City-->
+                        <td>{{ user[2] }}</td>
+                        <!--ZIP Code-->
+                        <td>{{ user[3] }}</td>
+                        <!--Country-->
+                        <td>{{ user[4] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+{% endblock %}

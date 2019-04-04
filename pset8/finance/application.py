@@ -47,7 +47,56 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+
+    if request.method == "POST":
+        # Checking for errors
+        if not request.form.get("symbol") or not request.form.get("shares"):
+            return apology("Please fill out the form")
+
+        # Search from lookup in helpers.py
+        quote = lookup(request.form.get("symbol"))
+        shares = int(request.form.get("shares"))
+
+        # Return error if there aren't any symbols found
+        if quote == None:
+            return apology("Symbol not found")
+
+        # Only positive integers allowed
+        if shares <= 0:
+            return apology("Only positive quantity")
+
+        # Selecting cash from allocated ID
+        rows = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id=session["user_id"])
+
+        # User cash
+        cash = rows[0]["cash"]
+
+        # Cost of the share
+        price_of_share = quote["price"]
+
+        # Total cost of buying shares
+        cost = price_of_share * shares
+
+        # Return error if user does not have enough cash
+        if cost > cash:
+            return apology("Sorry, not enough cash")
+
+        # if cash available update users and portfolio database
+        else:
+            db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=cost, user_id=session["user_id"])
+            db.execute("INSERT INTO portfolio (id, user_id, symbol, price_of_share, cost, shares) VALUES(NULL, :user_id, :symbol, :price_of_share, :cost, :shares)",
+                        user_id=session["user_id"],
+                        symbol=request.form.get("symbol"),
+                        price_of_share=price_of_share,
+                        cost=cost,
+                        shares=request.form.get("shares"))
+
+        flash("You successfully bouth your share/s")
+
+        return redirect("/")
+
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/check", methods=["GET"])

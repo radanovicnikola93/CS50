@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted
+{% endblock %}
+
+{% block main %}
+    <h3>{{ quote["symbol"] }}</h3>
+
+    <p>{{ quote["name"] }} ({{ quote["symbol"] }}) is currently {{ quote["price"] | usd}}.</p>
+
+    <img src="/static/notbad.jpg" alt="Not bad">
+{% endblock %}

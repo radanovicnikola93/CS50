@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+    <h3>Quote</h3>
+
+    <p>Check the current prices of shares you want to buy</p>
+    <form action="/quote" method="post">
+        <!-- Symbol -->
+        <div class="form-group">
+            <input autofocus autocomplete="off"  class="form-control" name="symbol" placeholder="Symbol (ex. NFLX)" type="text">
+        </div>
+
+        <button id="quote_button" type="submit" class="btn btn-primary">Quote</button>
+
+    </form>
+
+    <a href="https://iextrading.com/apps/stocks/" target="_blank" id="linkStock">List of stocks</a>
+
+{% endblock %}

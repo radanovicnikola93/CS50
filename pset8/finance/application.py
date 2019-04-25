@@ -1,7 +1,7 @@
 import os
 
 from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -16,12 +16,15 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Ensure responses aren't cached
+
+
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
@@ -40,7 +43,15 @@ db = SQL("sqlite:///finance.db")
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+
+    portfolio = db.execute(
+        "SELECT symbol, SUM(shares) as shares, price_of_share, cost FROM portfolio WHERE user_id = :user_id GROUP BY symbol", user_id=session["user_id"])
+
+    rows = db.execute("SELECT cash FROM users WHERE id = :user_id", user_id=session["user_id"])
+
+    cash_available = rows[0]["cash"]
+
+    return render_template("index.html", portfolio=portfolio, cash_available=cash_available)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -60,6 +71,11 @@ def buy():
         # Return error if there aren't any symbols found
         if quote == None:
             return apology("Symbol not found")
+
+        try:
+            shares = int(request.form.get("shares"))
+        except:
+            return apology("shares must be a positive integer")
 
         # Only positive integers allowed
         if shares <= 0:
@@ -85,11 +101,7 @@ def buy():
         else:
             db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=cost, user_id=session["user_id"])
             db.execute("INSERT INTO portfolio (id, user_id, symbol, price_of_share, cost, shares) VALUES(NULL, :user_id, :symbol, :price_of_share, :cost, :shares)",
-                        user_id=session["user_id"],
-                        symbol=request.form.get("symbol"),
-                        price_of_share=price_of_share,
-                        cost=cost,
-                        shares=request.form.get("shares"))
+                       user_id=session["user_id"], symbol=request.form.get("symbol"), price_of_share=price_of_share, cost=cost, shares=request.form.get("shares"))
 
         flash("You successfully bouth your share/s")
 
@@ -109,7 +121,12 @@ def check():
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+
+    # Selecting all data from database
+    history = db.execute(
+        "SELECT id, symbol, price_of_share as price, cost, time, shares FROM portfolio WHERE user_id = :user_id GROUP BY id", user_id=session["user_id"])
+
+    return render_template("history.html", history=history)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -185,6 +202,7 @@ def quote():
     else:
         return render_template("quote.html")
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -204,15 +222,14 @@ def register():
 
         # Storing data in database
         user = db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)",
-                            username=request.form.get("username"),
-                            hash=hash_password)
+                          username=request.form.get("username"), hash=hash_password)
 
         # Check if user exists
         if not user:
             return apology("User exists")
 
         # Print message if the user succesfully registered
-        flash('You were successfully registered')
+        flash('You are successfully registered')
 
         # Remember user after logging in
         session["user_id"] = user
@@ -223,11 +240,58 @@ def register():
     else:
         return render_template("register.html")
 
+
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+
+    if request.method == "POST":
+
+        quote = lookup(request.form.get("symbol"))
+
+        # checking for errors
+        if quote == None:
+            return apology("Symbol not found")
+
+        try:
+            shares = int(request.form.get("shares"))
+        except:
+            return apology("Must be a number")
+
+        if shares <= 0:
+            return apology("Must be a positive number")
+
+        # selecting available shares from portfolio
+        stock = db.execute("SELECT SUM(shares) as total_shares FROM portfolio WHERE user_id = :user_id and symbol = :symbol GROUP BY symbol",
+                           user_id=session["user_id"], symbol=request.form.get("symbol"))
+
+        # checking for available quantity of shares
+        if stock[0]["total_shares"] < 1 or shares > stock[0]["total_shares"]:
+            return apology("You don't have this much shares")
+
+        price_of_share = quote["price"]
+
+        # determing total price
+        cost = shares * price_of_share
+
+        # updating user cash
+        db.execute("UPDATE users SET cash = cash + :price WHERE id = :user_id", user_id=session["user_id"], price=cost)
+
+        # updating user portfolio
+        db.execute("INSERT INTO portfolio (id, user_id, symbol, price_of_share, cost, shares) VALUES(NULL, :user_id, :symbol, :price_of_share, :cost, :shares)",
+                   user_id=session["user_id"], symbol=request.form.get("symbol"),
+                   price_of_share=price_of_share, cost=cost, shares=-shares)
+
+        flash("Share sold!")
+
+        return redirect("/")
+
+    else:
+        user_shares = db.execute(
+            "SELECT symbol, SUM(shares) as total_shares FROM portfolio WHERE user_id = :user_id GROUP BY symbol", user_id=session["user_id"])
+
+        return render_template("sell.html", user_shares=user_shares)
 
 
 def errorhandler(e):
